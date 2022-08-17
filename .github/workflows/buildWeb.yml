@@ -6,26 +6,21 @@ on:
 jobs:
   build:
     name: Build Web
-    env:
-      my_secret: ${{secrets.commit_secret}}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install and Build
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
       - run: flutter --version
       - run: flutter pub get
-      - run: flutter build web --release --base-href="/TankControllerManager/"
-      - run: |
-          cd build/web
-          git init
-          git config --global user.email git1@jgfoster.net
-          git config --global user.name James Foster
-          git status
-          # change this remote url for examle your remote url is https://github.com/onatcipli/flutter_web.git then the following:
-          git remote add origin https://${{secrets.COMMIT_TO_BUILD_PAGES}}@github.com/Open-Acidification/TankControllerManager.git
-          git checkout -b gh-pages
-          git add --all
-          git commit -m "update"
-          git push origin gh-pages -f
+        run: flutter build web --release --base-href="/TankControllerManager/"
+        
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.4.0
+        with:
+          branch: gh-pages # the branch the action should deploy to
+          folder: build/web # the folder the action should deploy
